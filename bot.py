@@ -95,7 +95,7 @@ async def ask_deadpool(message: str) -> str:
                 "https://api.x.ai/v1/chat/completions",
                 headers={"Authorization": f"Bearer {GROK_API_KEY}", "Content-Type": "application/json"},
                 json={
-                    "model": "grok-3-mini",
+                    "model": "llama-3.3-70b-versatile",
                     "messages": [
                         {"role": "system", "content": prompt},
                         {"role": "user", "content": message}
