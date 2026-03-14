@@ -13,7 +13,7 @@ from telegram.ext import Application, CommandHandler, MessageHandler, CallbackQu
 BOT_TOKEN = "8701234942:AAGlPtJqTx_VWmAbZvUpEZXQYcyDoVQCp0A"
 GROK_API_KEY = "xai-FU5oU0y8fuuSoIOJqkNWZj56rN87JSwly0S4RhBWysgq5Ax4i6AbXFqEAWK25FsKQSEufR3Wo4BOM2ei"
 WEBAPP_URL = "https://web-production-7040f.up.railway.app/miniapp"  # Замени после деплоя
-CHANNEL_ID = "@YOUR_CHANNEL"  # Замени на свой канал
+CHANNEL_ID = "@deadpoolnah"  # Замени на свой канал
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
