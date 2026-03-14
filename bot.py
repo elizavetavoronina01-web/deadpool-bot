@@ -11,7 +11,7 @@ from telegram.ext import Application, CommandHandler, MessageHandler, CallbackQu
 
 # ===== НАСТРОЙКИ =====
 BOT_TOKEN = "8701234942:AAGlPtJqTx_VWmAbZvUpEZXQYcyDoVQCp0A"
-GROK_API_KEY = "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"
+GROK_API_KEY = "xai-FU5oU0y8fuuSoIOJqkNWZj56rN87JSwly0S4RhBWysgq5Ax4i6AbXFqEAWK25FsKQSEufR3Wo4BOM2ei"
 WEBAPP_URL = "https://web-production-7040f.up.railway.app/miniapp"  # Замени после деплоя
 CHANNEL_ID = "@deadpoolnah"  # Замени на свой канал
 
