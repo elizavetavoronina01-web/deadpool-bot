@@ -104,7 +104,11 @@ async def ask_deadpool(message: str) -> str:
                 }
             ) as resp:
                 data = await resp.json()
-                return data["choices"][0]["message"]["content"]
+                if "choices" in data:
+                    return data["choices"][0]["message"]["content"]
+                else:
+                    logger.error(f"Grok full response: {data}")
+                    return "ДЕДПУЛ ДУМАЕТ .......ПОПРОБУЙ ЕЩЕ РАЗ"
     except Exception as e:
         logger.error(f"Grok error: {e}")
         return "🤖 Дедпул временно отдыхает... но скоро вернётся с матюками 💀"
