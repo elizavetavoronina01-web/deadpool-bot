@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Deadpool NFT</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  
+  body {
+    font-family: 'Arial Black', sans-serif;
+    background: #0a0a0a;
+    color: #fff;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ФОН */
+  .bg {
+    position: fixed;
+    inset: 0;
+    background-image: url('bg.jpg');
+    background-size: cover;
+    background-position: center bottom;
+    z-index: 0;
+  }
+  .bg::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.5) 60%, rgba(0,0,0,0.75) 100%);
+  }
+
+  .container {
+    position: relative;
+    z-index: 1;
+    padding: 16px;
+    max-width: 480px;
+    margin: 0 auto;
+  }
+
+  /* HEADER */
+  .header {
+    text-align: center;
+    padding: 12px 0 8px;
+  }
+  .header img {
+    width: 90px;
+    height: 90px;
+    object-fit: cover;
+    border-radius: 50%;
+    border: 3px solid #e53935;
+    box-shadow: 0 0 20px #e5393588;
+  }
+  .header h1 {
+    font-size: 22px;
+    color: #e53935;
+    text-shadow: 0 0 10px #e53935aa;
+    margin-top: 8px;
+    letter-spacing: 2px;
+  }
+  .header p {
+    font-size: 12px;
+    color: #aaa;
+    margin-top: 4px;
+  }
+
+  /* БАЛАНС */
+  .balance-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(229,57,53,0.12);
+    border: 1px solid rgba(229,57,53,0.3);
+    border-radius: 12px;
+    padding: 10px 16px;
+    margin: 12px 0;
+  }
+  .balance-bar span { font-size: 13px; color: #ccc; }
+  .balance-bar strong { font-size: 16px; color: #FFD700; }
+
+  /* ТАБЫ */
+  .tabs {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 14px;
+  }
+  .tab {
+    flex: 1;
+    padding: 9px 4px;
+    border-radius: 10px;
+    border: 1px solid rgba(229,57,53,0.3);
+    background: rgba(0,0,0,0.4);
+    color: #aaa;
+    font-size: 11px;
+    font-weight: bold;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.2s;
+  }
+  .tab.active {
+    background: #e53935;
+    border-color: #e53935;
+    color: #fff;
+    box-shadow: 0 0 12px #e5393566;
+  }
+
+  /* СЕКЦИИ */
+  .section { display: none; }
+  .section.active { display: block; }
+
+  /* КЕЙСЫ */
+  .cases-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+  .case-card {
+    background: rgba(20,20,20,0.85);
+    border: 1px solid rgba(229,57,53,0.25);
+    border-radius: 14px;
+    padding: 14px 10px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+  .case-card:active { transform: scale(0.97); }
+  .case-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(229,57,53,0.08), transparent);
+    border-radius: 14px;
+  }
+  .case-emoji { font-size: 36px; display: block; margin-bottom: 6px; }
+  .case-name { font-size: 12px; font-weight: bold; color: #fff; margin-bottom: 4px; }
+  .case-price { font-size: 11px; color: #FFD700; }
+  .case-rarity { font-size: 10px; color: #aaa; margin-top: 3px; }
+
+  /* КНОПКА */
+  .btn-main {
+    width: 100%;
+    padding: 14px;
+    background: linear-gradient(135deg, #e53935, #b71c1c);
+    border: none;
+    border-radius: 14px;
+    color: #fff;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    letter-spacing: 1px;
+    box-shadow: 0 4px 20px rgba(229,57,53,0.4);
+    transition: all 0.2s;
+    margin-top: 8px;
+  }
+  .btn-main:active { transform: scale(0.98); }
+
+  /* РУЛЕТКА */
+  .roulette-wrap {
+    background: rgba(10,10,10,0.9);
+    border: 1px solid rgba(229,57,53,0.3);
+    border-radius: 16px;
+    padding: 16px;
+    margin-bottom: 14px;
+    overflow: hidden;
+  }
+  .roulette-title {
+    text-align: center;
+    font-size: 13px;
+    color: #aaa;
+    margin-bottom: 10px;
+  }
+  .roulette-track-wrap {
+    position: relative;
+    overflow: hidden;
+    height: 70px;
+    border-radius: 10px;
+    border: 1px solid rgba(229,57,53,0.2);
+  }
+  .roulette-track-wrap::before,
+  .roulette-track-wrap::after {
+    content: '';
+    position: absolute;
+    top: 0; bottom: 0;
+    width: 40px;
+    z-index: 2;
+  }
+  .roulette-track-wrap::before { left: 0; background: linear-gradient(to right, rgba(10,10,10,0.95), transparent); }
+  .roulette-track-wrap::after  { right: 0; background: linear-gradient(to left,  rgba(10,10,10,0.95), transparent); }
+  .roulette-pointer {
+    position: absolute;
+    top: 0; bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 2px;
+    background: #e53935;
+    z-index: 3;
+    box-shadow: 0 0 8px #e53935;
+  }
+  .roulette-track {
+    display: flex;
+    gap: 6px;
+    padding: 0 6px;
+    height: 100%;
+    align-items: center;
+    transition: transform 5s cubic-bezier(0.15, 0.85, 0.35, 1.0);
+    will-change: transform;
+  }
+  .roulette-item {
+    min-width: 60px;
+    height: 58px;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-size: 26px;
+    border: 1px solid rgba(255,255,255,0.1);
+    flex-shrink: 0;
+  }
+  .roulette-item span { font-size: 9px; color: #aaa; margin-top: 2px; }
+  .rarity-common    { background: rgba(80,80,80,0.5); }
+  .rarity-rare      { background: rgba(30,80,200,0.3); border-color: rgba(30,80,255,0.4); }
+  .rarity-epic      { background: rgba(120,0,200,0.3); border-color: rgba(160,0,255,0.4); }
+  .rarity-legendary { background: rgba(200,150,0,0.3); border-color: rgba(255,200,0,0.5); }
+
+  /* АЛЕРТЫ */
+  .alert-card {
+    background: rgba(20,20,20,0.85);
+    border: 1px solid rgba(229,57,53,0.2);
+    border-radius: 14px;
+    padding: 14px;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .alert-icon { font-size: 28px; }
+  .alert-info { flex: 1; }
+  .alert-info h3 { font-size: 14px; font-weight: bold; margin-bottom: 3px; }
+  .alert-info p  { font-size: 11px; color: #aaa; }
+  .alert-badge {
+    background: #e53935;
+    color: #fff;
+    font-size: 10px;
+    font-weight: bold;
+    padding: 3px 8px;
+    border-radius: 20px;
+  }
+
+  /* ПРОФИЛЬ */
+  .profile-card {
+    background: rgba(20,20,20,0.85);
+    border: 1px solid rgba(229,57,53,0.2);
+    border-radius: 14px;
+    padding: 16px;
+    margin-bottom: 10px;
+  }
+  .profile-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    font-size: 13px;
+  }
+  .profile-row:last-child { border-bottom: none; }
+  .profile-row .label { color: #aaa; }
+  .profile-row .value { color: #fff; font-weight: bold; }
+
+  /* ВИДЕО ОВЕРЛЕЙ */
+  .video-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.95);
+    z-index: 100;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+  .video-overlay.show { display: flex; }
+  .video-overlay video {
+    max-width: 100%;
+    max-height: 70vh;
+    border-radius: 16px;
+    box-shadow: 0 0 40px #e5393566;
+  }
+  .video-result {
+    margin-top: 16px;
+    text-align: center;
+    padding: 0 20px;
+  }
+  .video-result h2 { font-size: 20px; color: #FFD700; margin-bottom: 8px; }
+  .video-result p  { font-size: 13px; color: #ccc; line-height: 1.5; }
+  .btn-close-video {
+    margin-top: 16px;
+    padding: 12px 32px;
+    background: #e53935;
+    border: none;
+    border-radius: 12px;
+    color: #fff;
+    font-size: 15px;
+    font-weight: bold;
+    cursor: pointer;
+  }
+
+  /* АНИМАЦИЯ КОНФЕТТИ */
+  @keyframes fall {
+    0%   { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+  }
+  .confetti-piece {
+    position: fixed;
+    width: 8px; height: 8px;
+    border-radius: 2px;
+    z-index: 200;
+    animation: fall linear forwards;
+    pointer-events: none;
+  }
+
+  .spinning { animation: spin 0.5s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+
+<div class="bg"></div>
+
+<div class="container">
+  <!-- HEADER -->
+  <div class="header">
+    <img src="deadpool.jpg" alt="Deadpool" onerror="this.style.fontSize='60px';this.outerHTML='<div style=\'font-size:60px\'>🎭</div>'">
+    <h1>💀 DEADPOOL NFT</h1>
+    <p>крути кейсы • следи за дропами • богатей</p>
+  </div>
+
+  <!-- БАЛАНС -->
+  <div class="balance-bar">
+    <span>⭐ Твои Stars</span>
+    <strong id="userBalance">0</strong>
+    <span id="premiumBadge" style="display:none; background:#FFD700; color:#000; padding:2px 8px; border-radius:20px; font-size:11px; font-weight:bold;">PREMIUM</span>
+  </div>
+
+  <!-- ТАБЫ -->
+  <div class="tabs">
+    <div class="tab active" onclick="showTab('cases')">🎰 Кейсы</div>
+    <div class="tab" onclick="showTab('alerts')">🔔 Алерты</div>
+    <div class="tab" onclick="showTab('profile')">👤 Профиль</div>
+  </div>
+
+  <!-- ===== КЕЙСЫ ===== -->
+  <div id="tab-cases" class="section active">
+    <div class="cases-grid">
+      <div class="case-card" onclick="selectCase('basic', 10)">
+        <span class="case-emoji">📦</span>
+        <div class="case-name">Базовый</div>
+        <div class="case-price">⭐ 10 Stars</div>
+        <div class="case-rarity">Common — Rare</div>
+      </div>
+      <div class="case-card" onclick="selectCase('rare', 25)">
+        <span class="case-emoji">💎</span>
+        <div class="case-name">Редкий</div>
+        <div class="case-price">⭐ 25 Stars</div>
+        <div class="case-rarity">Rare — Epic</div>
+      </div>
+      <div class="case-card" onclick="selectCase('epic', 50)">
+        <span class="case-emoji">🔮</span>
+        <div class="case-name">Эпический</div>
+        <div class="case-price">⭐ 50 Stars</div>
+        <div class="case-rarity">Epic — Legendary</div>
+      </div>
+      <div class="case-card" onclick="selectCase('legendary', 100)">
+        <span class="case-emoji">👑</span>
+        <div class="case-name">Легендарный</div>
+        <div class="case-price">⭐ 100 Stars</div>
+        <div class="case-rarity">Гарантия Epic+</div>
+      </div>
+    </div>
+
+    <div class="roulette-wrap" id="rouletteWrap" style="display:none">
+      <div class="roulette-title">🎲 Крутим барабан...</div>
+      <div class="roulette-track-wrap">
+        <div class="roulette-pointer"></div>
+        <div class="roulette-track" id="rouletteTrack"></div>
+      </div>
+    </div>
+
+    <button class="btn-main" id="openBtn" onclick="openCase()" style="display:none">
+      🎰 ОТКРЫТЬ КЕЙС — <span id="casePrice">0</span> ⭐
+    </button>
+  </div>
+
+  <!-- ===== АЛЕРТЫ ===== -->
+  <div id="tab-alerts" class="section">
+    <div class="alert-card">
+      <div class="alert-icon">⚡</div>
+      <div class="alert-info">
+        <h3>Мгновенные алерты</h3>
+        <p>Узнай о новых NFT подарках первым</p>
+      </div>
+      <div class="alert-badge">PREMIUM</div>
+    </div>
+    <div class="alert-card">
+      <div class="alert-icon">📊</div>
+      <div class="alert-info">
+        <h3>Аналитика цен</h3>
+        <p>Оценка стоимости твоих NFT</p>
+      </div>
+      <div class="alert-badge">PREMIUM</div>
+    </div>
+    <div class="alert-card">
+      <div class="alert-icon">🎯</div>
+      <div class="alert-info">
+        <h3>Снайпер</h3>
+        <p>Находит дешёвые редкие подарки</p>
+      </div>
+      <div class="alert-badge">PREMIUM</div>
+    </div>
+    <button class="btn-main" onclick="buyPremium()">🔔 Купить Premium — 50 ⭐</button>
+  </div>
+
+  <!-- ===== ПРОФИЛЬ ===== -->
+  <div id="tab-profile" class="section">
+    <div class="profile-card">
+      <div class="profile-row">
+        <span class="label">👤 Имя</span>
+        <span class="value" id="profileName">—</span>
+      </div>
+      <div class="profile-row">
+        <span class="label">⭐ Баланс</span>
+        <span class="value" id="profileBalance">0 Stars</span>
+      </div>
+      <div class="profile-row">
+        <span class="label">🎰 Кейсов открыто</span>
+        <span class="value" id="profileCases">0</span>
+      </div>
+      <div class="profile-row">
+        <span class="label">🔔 Premium</span>
+        <span class="value" id="profilePremium">Нет</span>
+      </div>
+    </div>
+    <button class="btn-main" onclick="copyRef()">👥 Скопировать реф. ссылку</button>
+  </div>
+</div>
+
+<!-- ВИДЕО ОВЕРЛЕЙ -->
+<div class="video-overlay" id="videoOverlay">
+  <video id="resultVideo" playsinline></video>
+  <div class="video-result">
+    <h2 id="resultTitle">🎉 ВЫПАЛО!</h2>
+    <p id="resultDesc">...</p>
+  </div>
+  <button class="btn-close-video" onclick="closeVideo()">✅ ЗАБРАТЬ</button>
+</div>
+
+<script>
+const tg = window.Telegram?.WebApp;
+if (tg) { tg.expand(); tg.setHeaderColor('#0a0a0a'); }
+
+// Видосы
+const VIDEOS = ['videos/v1.mp4','videos/v2.mp4','videos/v3.mp4','videos/v4.mp4','videos/v5.mp4','videos/v6.mp4'];
+
+// Подарки для рулетки
+const GIFTS = [
+  { emoji: '🎩', name: 'Цилиндр', rarity: 'common',    color: 'rarity-common' },
+  { emoji: '🎸', name: 'Гитара',  rarity: 'common',    color: 'rarity-common' },
+  { emoji: '🌹', name: 'Роза',    rarity: 'rare',      color: 'rarity-rare' },
+  { emoji: '🍰', name: 'Торт',    rarity: 'rare',      color: 'rarity-rare' },
+  { emoji: '🦊', name: 'Лиса',    rarity: 'epic',      color: 'rarity-epic' },
+  { emoji: '🐉', name: 'Дракон',  rarity: 'epic',      color: 'rarity-epic' },
+  { emoji: '👑', name: 'Корона',  rarity: 'legendary', color: 'rarity-legendary' },
+  { emoji: '💎', name: 'Алмаз',   rarity: 'legendary', color: 'rarity-legendary' },
+];
+
+const RARITY_LABELS = { common: 'Common', rare: 'Rare', epic: 'Epic 🔮', legendary: 'LEGENDARY 👑' };
+const DEADPOOL_LINES = {
+  common:    ["Ну и хлам тебе выпал, бро 💀", "Поздравляю с мусором 😂", "Это что, шутка? 🤡"],
+  rare:      ["О, уже что-то! Не провал 😏", "Редкость! Ну почти 🎯", "Терпимо, боец 💪"],
+  epic:      ["БЛИН ЭТО ЭПИК! 🔥", "Вот это уже разговор! 💎", "Красава, серьёзно! 😎"],
+  legendary: ["ЛЕГЕНДА!!! Я ГОРЖУСЬ ТОБОЙ 👑🔥", "МАТЬ ТВОЮ ЭТО ЛЕГЕНДАРКА!!!", "👑💀 ВОТ ЭТО ДА!!!"],
+};
+
+let selectedCase = null;
+let casePrice = 0;
+let userData = { balance: 0, cases: 0, name: 'Игрок', premium: false };
+
+function showTab(name) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  event.target.classList.add('active');
+}
+
+function selectCase(type, price) {
+  selectedCase = type;
+  casePrice = price;
+  document.getElementById('casePrice').textContent = price;
+  document.getElementById('openBtn').style.display = 'block';
+  document.getElementById('rouletteWrap').style.display = 'none';
+  document.querySelectorAll('.case-card').forEach(c => c.style.border = '1px solid rgba(229,57,53,0.25)');
+  event.currentTarget.style.border = '2px solid #e53935';
+}
+
+function buildRoulette(winIndex) {
+  const track = document.getElementById('rouletteTrack');
+  track.style.transition = 'none';
+  track.style.transform = 'translateX(0)';
+  track.innerHTML = '';
+  const items = [];
+  for (let i = 0; i < 40; i++) {
+    let gift;
+    if (i === 32) { gift = GIFTS[winIndex]; }
+    else {
+      const pool = selectedCase === 'legendary' ? GIFTS.slice(4) :
+                   selectedCase === 'epic'      ? GIFTS.slice(2) :
+                   selectedCase === 'rare'      ? GIFTS.slice(1) : GIFTS;
+      gift = pool[Math.floor(Math.random() * pool.length)];
+    }
+    items.push(gift);
+  }
+  items.forEach(gift => {
+    const el = document.createElement('div');
+    el.className = `roulette-item ${gift.color}`;
+    el.innerHTML = `${gift.emoji}<span>${gift.name}</span>`;
+    track.appendChild(el);
+  });
+  return items;
+}
+
+async function openCase() {
+  if (!selectedCase) return;
+
+  document.getElementById('rouletteWrap').style.display = 'block';
+  document.getElementById('openBtn').disabled = true;
+  document.getElementById('openBtn').textContent = '⏳ Крутим...';
+
+  // Определяем выигрыш
+  const pools = {
+    basic:      [0,0,0,1,1,2],
+    rare:       [1,1,2,2,3],
+    epic:       [2,2,3,3],
+    legendary:  [2,3,3,3],
+  };
+  const pool = pools[selectedCase];
+  const winGiftIndex = pool[Math.floor(Math.random() * pool.length)];
+  const winGift = GIFTS[winGiftIndex];
+
+  buildRoulette(winGiftIndex);
+
+  await new Promise(r => setTimeout(r, 100));
+
+  const track = document.getElementById('rouletteTrack');
+  const itemW = 66;
+  const center = document.querySelector('.roulette-track-wrap').offsetWidth / 2;
+  const targetX = -(32 * itemW - center + itemW / 2);
+  track.style.transition = 'transform 5s cubic-bezier(0.15, 0.85, 0.35, 1.0)';
+  track.style.transform = `translateX(${targetX}px)`;
+
+  await new Promise(r => setTimeout(r, 5300));
+
+  // Обновляем данные
+  userData.cases++;
+  document.getElementById('profileCases').textContent = userData.cases;
+
+  // Показываем видос
+  showResultVideo(winGift);
+
+  document.getElementById('openBtn').disabled = false;
+  document.getElementById('openBtn').textContent = `🎰 ОТКРЫТЬ ЕЩЁ — ${casePrice} ⭐`;
+}
+
+function showResultVideo(gift) {
+  const videoEl = document.getElementById('resultVideo');
+  const randomVideo = VIDEOS[Math.floor(Math.random() * VIDEOS.length)];
+  videoEl.src = randomVideo;
+  videoEl.load();
+
+  const rarity = gift.rarity;
+  const lines = DEADPOOL_LINES[rarity];
+  const line = lines[Math.floor(Math.random() * lines.length)];
+
+  document.getElementById('resultTitle').textContent = `${gift.emoji} ${gift.name} — ${RARITY_LABELS[rarity]}`;
+  document.getElementById('resultDesc').textContent = line;
+
+  document.getElementById('videoOverlay').classList.add('show');
+  videoEl.play().catch(() => {});
+
+  if (rarity === 'legendary' || rarity === 'epic') {
+    spawnConfetti();
+  }
+}
+
+function closeVideo() {
+  const videoEl = document.getElementById('resultVideo');
+  videoEl.pause();
+  videoEl.src = '';
+  document.getElementById('videoOverlay').classList.remove('show');
+}
+
+function spawnConfetti() {
+  const colors = ['#e53935','#FFD700','#fff','#9c27b0','#2196f3'];
+  for (let i = 0; i < 60; i++) {
+    const el = document.createElement('div');
+    el.className = 'confetti-piece';
+    el.style.left = Math.random() * 100 + 'vw';
+    el.style.top = '-10px';
+    el.style.background = colors[Math.floor(Math.random() * colors.length)];
+    el.style.animationDuration = (1.5 + Math.random() * 2) + 's';
+    el.style.animationDelay = (Math.random() * 0.5) + 's';
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 4000);
+  }
+}
+
+function buyPremium() {
+  if (tg) tg.sendData(JSON.stringify({ action: 'buy_premium' }));
+}
+
+function copyRef() {
+  const link = `https://t.me/YOUR_BOT?start=ref${Date.now()}`;
+  navigator.clipboard?.writeText(link).then(() => {
+    alert('✅ Реф. ссылка скопирована!');
+  });
+}
+
+// Инициализация
+window.onload = () => {
+  if (tg?.initDataUnsafe?.user) {
+    const u = tg.initDataUnsafe.user;
+    userData.name = u.first_name || 'Игрок';
+  }
+  document.getElementById('profileName').textContent = userData.name;
+};
+</script>
+</body>
+</html>
