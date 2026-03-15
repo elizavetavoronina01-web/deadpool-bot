@@ -104,6 +104,7 @@ async def ask_deadpool(message: str) -> str:
                 }
             ) as resp:
                 data = await resp.json()
+                logger.info(f"Groq response: {data}")
                 return data["choices"][0]["message"]["content"]
     except Exception as e:
         logger.error(f"Groq error: {e}")
