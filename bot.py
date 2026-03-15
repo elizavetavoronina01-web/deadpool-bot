@@ -11,9 +11,9 @@ from telegram.ext import Application, CommandHandler, MessageHandler, CallbackQu
 
 # ===== НАСТРОЙКИ =====
 BOT_TOKEN = "8701234942:AAGlPtJqTx_VWmAbZvUpEZXQYcyDoVQCp0A"
-GROK_API_KEY = os.environ.get("GROK_API_KEY")
-WEBAPP_URL = "https://web-production-7040f.up.railway.app/miniapp"  # Замени после деплоя
-CHANNEL_ID = "@deadpoolnah"  # Замени на свой канал
+GROQ_API_KEY = os.environ.get("GROQ_API_KEY")
+WEBAPP_URL = "https://web-production-7040f.up.railway.app/miniapp"
+CHANNEL_ID = "@deadpoolnah"
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -85,17 +85,17 @@ def get_premium_users():
     conn.close()
     return users
 
-# ===== GROK AI =====
+# ===== GROQ AI =====
 async def ask_deadpool(message: str) -> str:
     prompt = """ты - дедпул, который анализирует сообщения и выдаёт краткий пересказ в своем стиле))).с эмодзи и сарказмом. не используй формальный язык, будь максимально неформальным и смешным в стиле дедпула. не пиши длинные предложения, будь кратким и ёмким. не используй сложные слова, говори просто и понятно. не пиши вступления, сразу к сути. не используй клише и избитые фразы. будь оригинальным и креативным. добавляй эмодзи в каждом предложении для выразительности. твоя задача - сделать пересказ максимально забавным и запоминающимся, чтобы читатели улыбались и хотели читать дальше. и добавляй матюки в стиле дедпула"""
     
     try:
         async with aiohttp.ClientSession() as session:
             async with session.post(
-                "https://api.x.ai/v1/chat/completions",
-                headers={"Authorization": f"Bearer {GROK_API_KEY}", "Content-Type": "application/json"},
+                "https://api.groq.com/openai/v1/chat/completions",
+                headers={"Authorization": f"Bearer {GROQ_API_KEY}", "Content-Type": "application/json"},
                 json={
-                    "model": "grok-3-mini",
+                    "model": "llama-3.3-70b-versatile",
                     "messages": [
                         {"role": "system", "content": prompt},
                         {"role": "user", "content": message}
@@ -104,14 +104,10 @@ async def ask_deadpool(message: str) -> str:
                 }
             ) as resp:
                 data = await resp.json()
-                if "choices" in data:
-                    return data["choices"][0]["message"]["content"]
-                else:
-                    logger.error(f"Grok full response: {data}")
-                    return "ДЕДПУЛ ДУМАЕТ .......ПОПРОБУЙ ЕЩЕ РАЗ"
+                return data["choices"][0]["message"]["content"]
     except Exception as e:
-        logger.error(f"Grok error: {e}")
-        return "🤖 Дедпул временно отдыхает... но скоро вернётся с матюками 💀"
+        logger.error(f"Groq error: {e}")
+        return "💀 Дедпул думает... попробуй ещё раз!"
 
 # ===== ПАРСИНГ FRAGMENT =====
 async def get_new_gifts():
