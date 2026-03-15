@@ -362,7 +362,7 @@ from http.server import HTTPServer, SimpleHTTPRequestHandler
 
 class MiniAppHandler(SimpleHTTPRequestHandler):
     def __init__(self, *args, **kwargs):
-        super().__init__(*args, directory="miniapp", **kwargs)
+        super().__init__(*args, directory=".", **kwargs)
     def log_message(self, format, *args):
         pass
 
