@@ -6,66 +6,169 @@
     <title>Deadpool NFT — Plush Pepe & Gifts</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        body { 
-            font-family: Arial, sans-serif; 
-            background: #111; color: #fff; 
-            margin: 0; padding: 20px; 
-            text-align: center; 
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            color: #fff;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+            text-align: center;
         }
-        h1 { color: #ff4444; }
-        .card { 
-            background: #222; 
-            border-radius: 12px; 
-            padding: 16px; 
-            margin: 16px 0; 
-            box-shadow: 0 4px 12px rgba(0,0,0,0.6);
+        h1 {
+            color: #ff2d55;
+            text-shadow: 0 0 10px #ff2d55;
+            margin-bottom: 10px;
         }
-        button { 
-            background: #ff4444; 
-            color: white; 
-            border: none; 
-            padding: 12px 24px; 
-            border-radius: 8px; 
-            font-size: 18px; 
-            margin: 10px; 
+        .container { max-width: 500px; margin: 0 auto; }
+        .card {
+            background: rgba(30, 30, 50, 0.8);
+            border-radius: 16px;
+            padding: 20px;
+            margin: 20px 0;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,45,85,0.3);
+        }
+        .gift-img {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 4px solid #ff2d55;
+            margin: 10px auto;
+            display: block;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.08); }
+            100% { transform: scale(1); }
+        }
+        button {
+            background: linear-gradient(45deg, #ff2d55, #ff6b6b);
+            color: white;
+            border: none;
+            padding: 14px 28px;
+            border-radius: 50px;
+            font-size: 18px;
+            margin: 12px 8px;
             cursor: pointer;
+            box-shadow: 0 4px 15px rgba(255,45,85,0.4);
+            transition: all 0.3s;
         }
-        button:hover { background: #cc0000; }
+        button:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(255,45,85,0.6); }
+        #case-result {
+            font-size: 24px;
+            margin: 20px 0;
+            color: #ffd700;
+            text-shadow: 0 0 15px #ffd700;
+            display: none;
+        }
+        .floor-price {
+            font-size: 28px;
+            font-weight: bold;
+            color: #00ff9d;
+            margin: 15px 0;
+        }
+        .loader {
+            border: 6px solid #f3f3f3;
+            border-top: 6px solid #ff2d55;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+            display: none;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
-    <h1>Deadpool NFT 💀</h1>
-    <p>Крути кейсы • лови дешёвые Plush Pepe • богатей на Telegram Gifts</p>
+    <div class="container">
+        <h1>Deadpool NFT 💀🎁</h1>
+        <p>Крути кейсы с Plush Pepe • лови дешёвые Gifts • богатей на TON</p>
 
-    <div class="card">
-        <h2>Текущий Floor Plush Pepe</h2>
-        <p id="floor">Загружаю цену... 🔥</p>
-        <button onclick="alert('Сейчас бот шлёт алерты в телегу!')">Обновить цену</button>
-    </div>
+        <!-- Floor Price блок -->
+        <div class="card">
+            <h2>Текущий Floor Plush Pepe</h2>
+            <div id="floor" class="floor-price">Загружаю... 🔥</div>
+            <button onclick="updateFloor()">Обновить цену</button>
+        </div>
 
-    <div class="card">
-        <h2>Кейсы</h2>
-        <button onclick="tg.MainButton.setText('Открыть за 10 ⭐'); tg.MainButton.show();">Базовый (10 Stars)</button><br>
-        <button onclick="tg.MainButton.setText('Открыть за 50 ⭐'); tg.MainButton.show();">Легендарный (50 Stars)</button>
-    </div>
+        <!-- Кейсы с анимацией -->
+        <div class="card">
+            <h2>Открыть кейс</h2>
+            <img src="https://via.placeholder.com/120/FF2D55/FFFFFF?text=Plush+Pepe" alt="Gift" class="gift-img" id="gift-img">
+            <button onclick="openCase(10)">Базовый (10 ⭐)</button>
+            <button onclick="openCase(50)">Легендарный (50 ⭐)</button>
+            <div class="loader" id="loader"></div>
+            <div id="case-result"></div>
+        </div>
 
-    <div class="card">
-        <h2>Premium фичи</h2>
-        <p>Мгновенные снайп-алерты на падение floor</p>
-        <button onclick="window.location='https://t.me/YOUR_BOT_USERNAME?start=premium'">Купить Premium 50⭐</button>
+        <!-- Премиум -->
+        <div class="card">
+            <h2>Premium Снайпер</h2>
+            <p>Мгновенные алерты на падение floor + бонусы</p>
+            <button onclick="buyPremium()">Купить за 50 ⭐</button>
+        </div>
     </div>
 
     <script>
         const tg = window.Telegram.WebApp;
         tg.ready();
         tg.expand();
-        tg.MainButton.onClick(() => {
-            tg.sendData("open_case");  // можно отправить данные в бот
-            alert("Кейс открыт! Результат в боте 💀");
-        });
+        tg.MainButton.hide();  // пока скрываем, используем свои кнопки
 
-        // Пример: можно запросить floor через бота, но пока статично
-        document.getElementById("floor").innerText = "≈ 7600 TON (обнови в боте командой /floor)";
+        // Показываем имя юзера
+        if (tg.initDataUnsafe.user) {
+            document.querySelector('h1').innerText += `, ${tg.initDataUnsafe.user.first_name}!`;
+        }
+
+        // Функция обновления floor (заглушка — в реале можно добавить fetch к твоему боту)
+        function updateFloor() {
+            document.getElementById('floor').innerText = '≈ 7 600 TON (актуально на март 2026)';
+            // TODO: здесь можно добавить fetch к endpoint бота, если сделаешь webhook
+        }
+        updateFloor();  // при загрузке
+
+        // Анимация открытия кейса
+        function openCase(cost) {
+            const resultDiv = document.getElementById('case-result');
+            const loader = document.getElementById('loader');
+            const img = document.getElementById('gift-img');
+
+            resultDiv.style.display = 'none';
+            loader.style.display = 'block';
+            img.style.animation = 'spin 2s linear infinite';  // крутим картинку
+
+            setTimeout(() => {
+                loader.style.display = 'none';
+                img.style.animation = 'pulse 2s infinite';
+
+                const rarities = ['Обычный Pepe 😴', 'Редкий Tropical Pepe 🌴🔥', 'Эпический Sunset Pepe 🌅💀', 'Легендарный Golden Pepe 🏆✨'];
+                const rarity = rarities[Math.floor(Math.random() * rarities.length)];
+
+                resultDiv.innerHTML = `ВЫПАЛО: <br><strong>${rarity}</strong><br>Стоимость: ${cost} Stars`;
+                resultDiv.style.display = 'block';
+
+                // Можно отправить в бот: tg.sendData(`open_case_${cost}`);
+                tg.MainButton.setText(`Забрать ${rarity.split(' ')[0]}`);
+                tg.MainButton.show();
+            }, 2500);  // 2.5 секунды анимации
+        }
+
+        // Кнопка премиум — перенаправляем в бот
+        function buyPremium() {
+            tg.openTelegramLink('https://t.me/' + tg.initDataUnsafe.bot?.username + '?start=buy_premium');
+            // или tg.close() если хочешь закрыть Mini App
+        }
+
+        // MainButton обработчик (если юзер нажмёт "Забрать")
+        tg.MainButton.onClick(() => {
+            alert('Результат отправлен в бот! Проверь чат 💀');
+            tg.MainButton.hide();
+        });
     </script>
 </body>
 </html>
