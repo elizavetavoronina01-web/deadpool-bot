@@ -357,5 +357,21 @@ def main():
     logger.info("🚀 Дедпул-бот запущен!")
     app.run_polling()
 
+import threading
+from http.server import HTTPServer, SimpleHTTPRequestHandler
+
+class MiniAppHandler(SimpleHTTPRequestHandler):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, directory="miniapp", **kwargs)
+    def log_message(self, format, *args):
+        pass
+
+def run_web_server():
+    port = int(os.environ.get("PORT", 8080))
+    server = HTTPServer(("0.0.0.0", port), MiniAppHandler)
+    server.serve_forever()
+
 if __name__ == "__main__":
+    web_thread = threading.Thread(target=run_web_server, daemon=True)
+    web_thread.start()
     main()
