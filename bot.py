@@ -11,7 +11,7 @@ from telegram.ext import Application, CommandHandler, MessageHandler, CallbackQu
 
 # ===== НАСТРОЙКИ =====
 BOT_TOKEN = "8701234942:AAGlPtJqTx_VWmAbZvUpEZXQYcyDoVQCp0A"
-GROQ_API_KEY = os.environ.get("GROQ_API_KEY")
+GROQ_API_KEY = os.environ.get("GROQ_API_KEY","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")
 WEBAPP_URL = "https://web-production-7040f.up.railway.app/miniapp"
 CHANNEL_ID = "@deadpoolnah"
 
